@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 include(cmake/prelude.cmake)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
     tower
@@ -12,6 +13,8 @@ project(
 
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
+
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 # ---- Declare library ----
 
@@ -37,7 +40,8 @@ set_property(TARGET tower_exe PROPERTY OUTPUT_NAME tower)
 
 target_compile_features(tower_exe PRIVATE cxx_std_20)
 
-target_link_libraries(tower_exe PRIVATE tower_lib)
+target_link_libraries(tower_exe PRIVATE tower_lib Eigen3::Eigen)
+
 
 # ---- Install rules ----
 
