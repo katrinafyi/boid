@@ -14,7 +14,26 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+include(FetchContent)
+
+FetchContent_Declare(
+  Eigen
+  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+  GIT_TAG master
+  GIT_SHALLOW TRUE
+  GIT_PROGRESS TRUE)
+set(EIGEN_BUILD_DOC OFF)
+# note: To disable eigen tests,
+# you should put this code in a add_subdirectory to avoid to change
+# BUILD_TESTING for your own project too since variables are directory
+# scoped
+set(BUILD_TESTING OFF)
+set(EIGEN_BUILD_PKGCONFIG OFF)
+set( OFF)
+FetchContent_MakeAvailable(Eigen)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+FetchContent_MakeAvailable(json)
 
 # ---- Declare library ----
 
@@ -40,7 +59,7 @@ set_property(TARGET tower_exe PROPERTY OUTPUT_NAME tower)
 
 target_compile_features(tower_exe PRIVATE cxx_std_20)
 
-target_link_libraries(tower_exe PRIVATE tower_lib Eigen3::Eigen)
+target_link_libraries(tower_exe PRIVATE tower_lib Eigen3::Eigen nlohmann_json::nlohmann_json)
 
 
 # ---- Install rules ----
@@ -61,3 +80,5 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
 endif()
 
 include(cmake/dev-mode.cmake)
+
+target_compile_options(tower_exe -g -fsanitize=address,undefined)

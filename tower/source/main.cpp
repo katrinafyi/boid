@@ -7,14 +7,39 @@
 
 #include <Eigen/Dense>
 
+#include "json.hpp"
 #include "lib.hpp"
 
+using json = nlohmann::json;
+
 using real = double;
+
+namespace nlohmann
+{
+template<>
+struct adl_serializer<Eigen::Vector3d>
+{
+  static void to_json(json& j, const Eigen::Vector3d& vec)
+  {
+    j = json::array({vec[0], vec[1], vec[2]});
+  }
+
+  static void from_json(const json& j, Eigen::Vector3d& vec)
+  {
+    assert(j.size() == 3);
+    vec[0] = j[0];
+    vec[1] = j[1];
+    vec[2] = j[2];
+  }
+};
+}  // namespace nlohmann
 
 struct boid
 {
   Eigen::Vector3d pos;
   Eigen::Vector3d vel;
+
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(boid, pos, vel);
 };
 
 using boids = std::vector<boid>;
@@ -46,7 +71,8 @@ boids init()
   boids boids(num_boids);
   for (int i = 0; i < num_boids; i++) {
     boids.push_back(
-        {{jitter(twister), jitter(twister), jitter(twister)}, {0, 0, 0}});
+        {{jitter(twister), jitter(twister), jitter(twister)},
+         {jitter(twister) / 2, jitter(twister) / 2, jitter(twister) / 2}});
   }
   return boids;
 }
@@ -89,32 +115,32 @@ void step()
       }
 
       const real speed2 = update.at(i).vel.squaredNorm();
-      if (speed2 < speed_min * speed_min) {
-        update.at(i).vel = update.at(i).vel / sqrt(speed2) * speed_min;
-      } else if (speed2 > speed_max * speed_max) {
-        update.at(i).vel = update.at(i).vel / sqrt(speed2) * speed_max;
+      if (speed2 != 0) {
+        if (speed2 < speed_min * speed_min) {
+          assert(speed2 != 0);
+          update.at(i).vel = update.at(i).vel / sqrt(speed2) * speed_min;
+        } else if (speed2 > speed_max * speed_max) {
+          assert(speed2 != 0);
+          update.at(i).vel = update.at(i).vel / sqrt(speed2) * speed_max;
+        }
       }
     }
   }
   is_one ^= 1U;
 }
 
-void dump(std::ostream& out)
+void dump()
 {
-  uint64_t size = boids1.size();
-  out.write(reinterpret_cast<char*>(&size), sizeof(size));
-  out.write(reinterpret_cast<char*>((is_one ? boids1 : boids2).data()),
-            sizeof(boids1[0]) * size);
-  out.flush();
+  std::cout << json {boids1} << std::endl;
 }
 
 int main()
 {
   boids1 = init();
-  dump(std::cout);
+  dump();
   for (int i = 0; i < 10; i++) {
     step();
-    dump(std::cout);
+    dump();
   }
   return 0;
 }
