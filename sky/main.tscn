@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://dlgsuk0jcp2km"]
+
+[ext_resource type="Script" path="res://Camera3D.gd" id="1_6ifnp"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bimxp"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_d6bqa"]
+sky_material = SubResource("ProceduralSkyMaterial_bimxp")
+
+[sub_resource type="Environment" id="Environment_w0esx"]
+background_mode = 2
+sky = SubResource("Sky_d6bqa")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_xsla7"]
+size = Vector3(100, 1, 1)
+
+[node name="Node" type="Node"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_w0esx")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 10.2633, 0)
+shadow_enabled = true
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D"]
+mesh = SubResource("BoxMesh_xsla7")
+
+[node name="Node3D" type="Node3D" parent="Node3D"]
+transform = Transform3D(0.488286, 0, 0.872684, 0, 1, 0, -0.872684, 0, 0.488286, -1.17367, 3.38567, -1.46643)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/Node3D"]
+mesh = SubResource("BoxMesh_xsla7")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.949052, 0.315119, 0, -0.315119, 0.949052, -8.08072, 8.55572, 9.48204)
+script = ExtResource("1_6ifnp")
